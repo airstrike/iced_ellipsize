@@ -1,0 +1,9 @@
+[package]
+name = "ellipsize"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+iced = { version = "0.13.1", features = ["lazy", "advanced"] }
+# unicode-segmentation = "1.0"
+cosmic-text = "0.12"
