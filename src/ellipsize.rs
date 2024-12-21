@@ -1,5 +1,4 @@
 // //! Draw ellipsizing paragraphs.
-
 use cosmic_text::{Buffer, Metrics};
 use iced::advanced::graphics::text;
 use iced::advanced::text::{Shaping as IcedShaping, Text, Wrapping};
@@ -9,7 +8,7 @@ use iced::{Element, Font, Pixels, Size};
 pub struct Content {
     text: String,
     size: Pixels,
-    max_size: Size,
+    max_size: Option<Size>,
     font: Option<Font>,
     line_height: LineHeight,
     horizontal_alignment: iced::alignment::Horizontal,
@@ -17,7 +16,7 @@ pub struct Content {
 }
 
 impl Content {
-    pub fn new(text: String, max_size: Size) -> Self {
+    pub fn new(text: String, max_size: Option<Size>) -> Self {
         Self {
             text,
             size: 14.0.into(),
@@ -68,27 +67,39 @@ where
 {
     fn from(content: Content) -> Element<'a, Message, Theme, Renderer> {
         let font = content.font.unwrap_or(iced::Font::DEFAULT);
-        let text = Text {
-            content: content.text,
-            size: content.size,
-            font,
-            line_height: content.line_height,
-            horizontal_alignment: content.horizontal_alignment,
-            vertical_alignment: content.vertical_alignment,
-            wrapping: Wrapping::Word,
-            shaping: IcedShaping::Advanced,
-            bounds: content.max_size,
-        };
+        if let Some(max_size) = content.max_size {
+            let text = Text {
+                content: content.text,
+                size: content.size,
+                font,
+                line_height: content.line_height,
+                horizontal_alignment: content.horizontal_alignment,
+                vertical_alignment: content.vertical_alignment,
+                wrapping: Wrapping::WordOrGlyph,
+                shaping: IcedShaping::Advanced,
+                bounds: max_size,
+            };
 
-        iced::widget::text(ellipsize(text, content.max_size))
-            .font(font)
-            .size(content.size)
-            .line_height(content.line_height)
-            .align_x(content.horizontal_alignment)
-            .align_y(content.vertical_alignment)
-            .wrapping(Wrapping::Word)
-            .shaping(IcedShaping::Advanced)
-            .into()
+            iced::widget::text(ellipsize(text, max_size))
+                .font(font)
+                .size(content.size)
+                .line_height(content.line_height)
+                .align_x(content.horizontal_alignment)
+                .align_y(content.vertical_alignment)
+                .wrapping(Wrapping::WordOrGlyph)
+                .shaping(IcedShaping::Advanced)
+                .into()
+        } else {
+            iced::widget::text(content.text)
+                .font(font)
+                .size(content.size)
+                .line_height(content.line_height)
+                .align_x(content.horizontal_alignment)
+                .align_y(content.vertical_alignment)
+                .wrapping(Wrapping::WordOrGlyph)
+                .shaping(IcedShaping::Advanced)
+                .into()
+        }
     }
 }
 

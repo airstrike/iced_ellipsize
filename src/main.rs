@@ -1,14 +1,13 @@
-use iced::alignment::Horizontal::Right;
-use iced::widget::{center, checkbox, column, responsive, text};
-use iced::{Element, Task};
+use iced::widget::{center, checkbox, column, responsive};
+use iced::{Alignment, Element, Task};
 
 mod ellipsize;
 
 fn main() -> iced::Result {
-    iced::application("iced window handler", App::update, App::view)
+    iced::application("iced ellipsizing text", App::update, App::view)
         .window(iced::window::Settings {
             size: (300.0, 300.0).into(),
-            min_size: Some((200.0, 200.0).into()),
+            min_size: Some((200.0, 100.0).into()),
             ..Default::default()
         })
         .centered()
@@ -34,20 +33,11 @@ impl App {
     fn view(&self) -> Element<'_, Message> {
         column![
             checkbox("Ellipsize", self.ellipsize).on_toggle(Message::ToggleEllipsize),
-            center(responsive(move |size| {
-                Element::from(ellipsize::Content::new(
-                    LIPSUM.to_string(),
-                    if self.ellipsize {
-                        size
-                    } else {
-                        iced::Size::INFINITY
-                    },
-                ))
-            }))
+            center(ellipsize_text(LIPSUM, self.ellipsize))
         ]
         .padding(20)
         .spacing(10)
-        .align_x(Right)
+        .align_x(Alignment::End)
         .into()
     }
 
@@ -62,7 +52,15 @@ impl App {
     }
 }
 
-// pub static LIPSUM: &str = "Lorem ipsum dolor sit amet.";
+pub fn ellipsize_text(text: &str, ellipsize: bool) -> Element<'_, Message> {
+    responsive(move |size: iced::Size<f32>| {
+        Element::from(ellipsize::Content::new(
+            text.to_string(),
+            ellipsize.then(|| size),
+        ))
+    })
+    .into()
+}
 
 pub static LIPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing\
 elit. Integer sit amet risus lorem. Fusce varius sem ut risus tincidunt mollis. \
